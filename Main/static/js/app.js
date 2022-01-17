@@ -81,7 +81,6 @@ function constructor() {
     // add functionality to each item in dropdown menu
     document.querySelector("#selDataset").addEventListener("change", event => {
         populator(event.target.value);
-        // buildMetadata(event.target.value);
     });
 
     // populate dropdown menu
