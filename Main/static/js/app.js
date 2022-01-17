@@ -19,38 +19,32 @@ async function loadFile(path) {
 //SCRAPER/PARSER FUNCTION FOR ANY GIVEN SUBJECT NUMBER
 //---------------------------------------------------------
 // scraping samples
-async function scrapeSamples(subjectNum) {
+async function scrapeData(subjectNum, type) {
     // load data from file
     let bigData = await loadFile(filepath);
     // console.log(bigData);
 
-    // filter down to specific bacteria samples of given subject number
-    return bigData.samples.filter(item => item.id == subjectNum)[0];
-};
-
-// scraping metadata
-async function scrapeMeta(subjectNum) {
-    // load data from file
-    let bigData = await loadFile(filepath);
-    // console.log(bigData);
-
-    // filter down to specific bacteria samples of given subject number
-    return bigData.metadata.filter(item => item.id == subjectNum)[0];
+    // filter down to either sample or metadata of given subject number
+    if (type === "sample") {
+        return bigData.samples.filter(item => item.id == subjectNum)[0];
+    } else if (type === "metadata") {
+        return bigData.metadata.filter(item => item.id == subjectNum)[0];
+    } else {
+        return;
+    };
 };
 
 //---------------------------------------------------------
 //WEBPAGE POPULATOR/GRAPHER FUNCTION FOR ANY GIVEN SUBJECT NUMBER
 //---------------------------------------------------------
 function populator(subjectNum) {
-    // scrape data and sort it
-    let sample = scrapeSamples(subjectNum);
-    let sortedSample = sortTopTen(sample);
-
     //build table
-    let metadata = scrapeMeta(subjectNum);
-    buildTable(subjectNum);
+    let metadata = scrapeData(subjectNum, "metadata");
+    buildTable(metadata);
 
     // build charts
+    let sample = scrapeData(subjectNum, "sample");
+    let sortedSample = sortTopTen(sample);
     buildBar(sortedSample);
     buildBubble(sortedSample);
     // buildGauge(sortedSample);
@@ -76,100 +70,6 @@ function sortTopTen(sample) {
     sample.otu_ids = sample.otu_ids.slice(0, 10)
     sample.otu_labels = sample.otu_labels.slice(0, 10)
     sample.sample_values = sample.sample_values.slice(0, 10)
-};
-
-//---------------------------------------------------------
-//TABLE CONSTRUCTOR FUNCTION
-//---------------------------------------------------------
-function buildTable(subjectNum) {
-    // reset data in table
-    document.querySelector("#sample-metadata").innerHTML = "";
-  
-    // populating each value
-    Object.entries(metadata).forEach(([key, value]) => {
-        let tableElement = document.createElement("h4");
-        tableElement.textContent = `${key.toUpperCase()}: ${value}`;
-        panel.append(tableElement);
-    });
-};
-
-//---------------------------------------------------------
-//BAR CHART CONSTRUCTOR FUNCTION
-//---------------------------------------------------------
-function buildBar(sortedSample) {
-    // define title here for easy editing
-    let barTitle = `Top 10 OTUs Found in Subject ${subjectNum}'s Bellybutton`
-
-    // define trace's data
-    let trace1 = {
-        y: sortedSample.otu_ids,
-        x: sortedSample.sample_values,
-        text: sortedSample.otu_labels,
-        name: `Subject ${subjectNum}`,
-        type: "bar",
-        orientation: "h",
-    };
-    let barTraceData = [trace1]
-
-    // define trace's layout
-    let barLayout = {
-        title: barTitle,
-        margin: {
-            t: 30,
-            b: 30,
-            l: 10,
-            r: 10
-        }
-    };
-
-    // graph plot
-    Plotly.newPlot("bar", barTraceData, barLayout);
-};
-
-//---------------------------------------------------------
-//BUBBLE CHART CONSTRUCTOR FUNCTION
-//---------------------------------------------------------
-function buildBubble(sortedSample) {
-    // define title here for easy editing
-    let barTitle = `Bacteria Cultures Per Sample in ${subjectNum}'s Bellybutton`
-
-    // define trace's data
-    let trace1 = {
-        y: sortedSample.otu_ids,
-        x: sortedSample.sample_values,
-        text: sortedSample.otu_labels,
-        name: `Subject ${subjectNum}`,
-        mode: 'markers',
-        marker: {
-            size: sortedSample.sample_values,
-            color: sortedSample.otu_ids,
-            // colorscale: 'Earth'
-        }
-        // type: "bubble"
-    };
-    let bubbleTraceData = [trace1]
-
-    // define trace's layout
-    let barLayout = {
-        title: barTitle,
-        margin: {
-            t: 30,
-            b: 30,
-            l: 10,
-            r: 10
-        },
-        hovermode: "closest",
-        xaxis: { title: "OTU ID" }
-    };
-
-    // graph plot
-    Plotly.newPlot("bubble", bubbleTraceData, bubbleLayout);
-};
-
-//---------------------------------------------------------
-//GAUGE CHART CONSTRUCTOR FUNCTION
-//---------------------------------------------------------
-function buildGauge(sortedSample) {
 };
 
 //---------------------------------------------------------
