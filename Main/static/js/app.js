@@ -53,14 +53,14 @@ function populator(subjectNum) {
 //---------------------------------------------------------
 //SORTER FUNCTION TO FIND TOP 10 OTU FROM SAMPLE
 //---------------------------------------------------------
-// define a helper function called zip to help combine arrays
+// // define a helper function called zip to help combine arrays
 // function zip(arr1, arr2) {
 //     return arr1.map((element, i) => [element, arr2[i]]);
 // };
 
 // // function that sorts, using the helper function
 // function sortTopTen(sample) {
-//     let zippedSample = zip(sample.sample_values, zip(sample.otu_ids, sample.otu_labels));
+//     let zippedSample = zip(Object.values(sample.sample_values), zip(Object.values(sample.otu_ids), Object.values(sample.otu_labels)));
 //     let sortedZippedSample = zippedSample.sort((a,b) => b[0] - a[0]);
 //     return sortedZippedSample.slice(0, 10);
 // };
