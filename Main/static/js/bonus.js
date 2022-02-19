@@ -1,9 +1,9 @@
-/**
- * BONUS Solution
- * */
-function buildGauge(wfreq) {
+//---------------------------------------------------------
+// GRAPH GAUGE
+//---------------------------------------------------------
+function buildGauge(subNum) {
   // Enter the washing frequency between 0 and 180
-  var level = parseFloat(wfreq) * 20;
+  var level = parseFloat(subNum) * 20;
 
   // Trig to calc meter point
   var degrees = 180 - level;

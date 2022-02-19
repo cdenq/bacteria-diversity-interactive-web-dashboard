@@ -1,115 +1,113 @@
-async function main() {
+//---------------------------------------------------------
+// GRAPH ALL
+//---------------------------------------------------------
+//function that graphs all the graphs
+function graphAll(subNum) {
+    buildTable(subNum);
+    buildBar(subNum);
+    buildBubble(subNum);
+    buildGauge(subNum);
+};
 
-  // Fetch the local json data and assign it to the global variable 'data'
-  const response = await fetch("./samples.json");
-  data = await response.json();
-  console.log(data);
+//---------------------------------------------------------
+//TABLE CONSTRUCTOR FUNCTION
+//---------------------------------------------------------
+async function buildTable(subNum) {
+    // load and select relevant data
+    let rawData = await loadFile(filepath);
+    // console.log(rawData)
+    let subNumData = rawData.metadata.filter(i => i.id == subNum)[0];
 
+    // select the panel
+    let panel = document.querySelector("#sample-metadata");
 
-  // Use the sample names in the data to populate the select box with options
-  data.names.forEach(sample => {
-    const option = document.createElement("option");
-    option.textContent = sample;
-    document.querySelector("#selDataset").append(option);
-  });
+    // clear panel then populate it
+    panel.innerHTML = "";
+    Object.entries(subNumData).forEach(([key, value]) => {
+        let h6 = document.createElement("h6");
+        h6.textContent = `${key.toUpperCase()}: ${value}`
+        panel.append(h6);
+    });
+};
 
+//---------------------------------------------------------
+//BAR CHART CONSTRUCTOR FUNCTION
+//---------------------------------------------------------
+async function buildBar(subNum) {
+    // define title here for easy editing
+    let barTitle = `Top 10 OTUs Found in Subject ${subNum}'s Bellybutton`
 
-  // Setup an event listener on the select box to change the charts when a new sample is selected
-  document.querySelector("#selDataset").addEventListener("change", event => {
-    buildCharts(event.target.value);
-    buildMetadata(event.target.value);
-  })
+    // load and select relevant data
+    let rawData = await loadFile(filepath);
+    // console.log(rawData)
+    let subNumData = rawData.samples.filter(i => i.id == subNum)[0];
 
-
-  // Set the inital value for the select box
-  document.querySelector("#selDataset").value = data.names[0];
-
-
-  // Use the first sample from the list to build the initial plots
-  buildCharts(data.names[0]);
-  buildMetadata(data.names[0]);
-}
-
-
-
-function buildCharts(sample) {
-
-    // Filter the data to the specific sample we are interested in, there will be only one result
-    const result = data.samples.filter(sampleObj => sampleObj.id == sample)[0];
-
-    // Build a Bubble Chart
-    var bubbleLayout = {
-      title: "Bacteria Cultures Per Sample",
-      margin: { t: 0 },
-      hovermode: "closest",
-      xaxis: { title: "OTU ID" },
-      margin: { t: 30}
+    // define trace's data
+    let trace1 = {
+        x: subNumData.sample_values.slice(0, 10).reverse(),
+        y: subNumData.otu_ids.slice(0, 10).map(i => `OTU ${i}`).reverse(),
+        text: subNumData.otu_labels.slice(0, 10).reverse(),
+        name: `Subject ${subNum}`,
+        type: 'bar',
+        orientation: 'h',
     };
+    let barTraceData = [trace1]
 
-    var bubbleData = [
-      {
-        x: result.otu_ids,
-        y: result.sample_values,
-        text: result.otu_labels,
-        mode: "markers",
-        marker: {
-          size: result.sample_values,
-          color: result.otu_ids,
-          colorscale: "Earth"
+    // define trace's layout
+    let barLayout = {
+        title: barTitle,
+        margin: {
+            t: 30,
+            b: 30,
+            l: 10,
+            r: 10
         }
-      }
-    ];
-
-    Plotly.newPlot("bubble", bubbleData, bubbleLayout);
-
-    var yticks = result.otu_ids.slice(0, 10).map(otuID => `OTU ${otuID}`).reverse();
-    var barData = [
-      {
-        y: yticks,
-        x: result.sample_values.slice(0, 10).reverse(),
-        text: result.otu_labels.slice(0, 10).reverse(),
-        type: "bar",
-        orientation: "h",
-      }
-    ];
-
-    var barLayout = {
-      title: "Top 10 Bacteria Cultures Found",
-      margin: { t: 30, l: 150 }
     };
 
-    Plotly.newPlot("bar", barData, barLayout);
+    // graph plot
+    Plotly.newPlot('bar', barTraceData, barLayout);
+};
 
-}
+//---------------------------------------------------------
+//BUBBLE CHART CONSTRUCTOR FUNCTION
+//---------------------------------------------------------
+async function buildBubble(subNum) {
+    // define title here for easy editing
+    let bubbleTitle = `Bacteria Cultures Per Sample in Subject ${subNum}'s Bellybutton`
 
+    // load and select relevant data
+    let rawData = await loadFile(filepath);
+    // console.log(rawData)
+    let subNumData = rawData.samples.filter(sampleObj => sampleObj.id == subNum)[0];
 
-async function buildMetadata(sample) {
-  
-  
-  // Filter the data for the object with the desired sample number
-  const result = data.metadata.filter(sampleObj => sampleObj.id == sample)[0];
+    // define trace's data
+    let trace1 = {
+        x: subNumData.otu_ids,
+        y: subNumData.sample_values,
+        text: subNumData.otu_labels,
+        name: `Subject ${subNum}`,
+        mode: 'markers',
+        marker: {
+            size: subNumData.sample_values,
+            color: subNumData.otu_ids,
+            // colorscale: 'Earth'
+        }
+    };
+    let bubbleTraceData = [trace1]
 
-  // Select the panel with id of `#sample-metadata`
-  const panel = document.querySelector("#sample-metadata");
+    // define trace's layout
+    let bubbleLayout = {
+        title: bubbleTitle,
+        margin: {
+            t: 30,
+            b: 30,
+            l: 10,
+            r: 10
+        },
+        hovermode: 'closest',
+        xaxis: { title: 'OTU ID' }
+    };
 
-  // Clear any existing metadata
-  panel.innerHTML = "";
-
-  // Use `Object.entries` to add each key and value pair to the panel
-  // Hint: Inside the loop, you will need to to append new
-  // elements for each key-value in the metadata.
-  Object.entries(result).forEach(([key, value]) => {
-    const h6 = document.createElement("h6");
-    h6.textContent = `${key.toUpperCase()}: ${value}`
-    panel.append(h6);
-  });
-
-  // BONUS: Build the Gauge Chart
-  buildGauge(result.wfreq);
-
-}
-
-
-// Initialize the application
-let data = {};
-main();
+    // graph plot
+    Plotly.newPlot('bubble', bubbleTraceData, bubbleLayout);
+};

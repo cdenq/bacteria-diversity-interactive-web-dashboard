@@ -1,7 +1,9 @@
 # bacteria-diversity-interactive-web-dashboard
 ## About Belly Button Biodiversity
 
-`Belly Button Biodiversity` is a HTML/CSS/JS challenge that cleans, analyzes, and visualizes belly button bacteria data onto an interactive web dashboard. 
+`Belly Button Biodiversity` is a HTML/CSS/JS challenge that cleans, analyzes, and visualizes belly button bacteria data onto an interactive web dashboard.
+
+Data is obtained from [The Public Science Lab](http://robdunnlab.com/projects/belly-button-biodiversity/).
 
 ## Built with
 - HTML
@@ -15,4 +17,4 @@
 - Server/webpage application setup
 
 ## Screenshots
-![Image 1](https://user-images.githubusercontent.com/74934154/154113745-25d27073-39e7-4516-b622-8a22aeebc0dc.png)
+![Image 1](https://user-images.githubusercontent.com/74934154/154782620-ed81516b-8e1f-43cc-a747-d4599e6effbc.png)

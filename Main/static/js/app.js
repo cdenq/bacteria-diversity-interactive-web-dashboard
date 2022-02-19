@@ -1,99 +1,54 @@
 //---------------------------------------------------------
-//GLOBAL VARIABLES
+// SETUP AND GLOBAL VARIABLES
 //---------------------------------------------------------
+// setup
+'use strict';
+
 // create filepath of file
-const filepath = 'resources/samples.json'
+const filepath = '../resources/samples.json'
 
 //---------------------------------------------------------
-//LOADER FUNCTION THAT LOADS DATA FROM FILE
+// LOADER FUNCTION THAT LOADS DATA FROM FILE
 //---------------------------------------------------------
-// fetch call using promises
-// fetch(filepath).then(response => response.json())
-
 // fetch call using async function
 async function loadFile(path) {
-    return (await fetch(path)).json();
-};
-
-//---------------------------------------------------------
-//SCRAPER/PARSER FUNCTION FOR ANY GIVEN SUBJECT NUMBER
-//---------------------------------------------------------
-// scraping samples
-async function scrapeData(subjectNum, type) {
-    // load data from file
-    let bigData = await loadFile(filepath);
-    // console.log(bigData);
-
-    // filter down to either sample or metadata of given subject number
-    if (type === "sample") {
-        return bigData.samples.filter(item => item.id == subjectNum)[0];
-    } else if (type === "metadata") {
-        return bigData.metadata.filter(item => item.id == subjectNum)[0];
-    } else {
-        return;
+    try {
+        let response = await fetch(path);
+        let rawData = await response.json();
+        // console.log(rawData);
+        return rawData;
+    } catch(error) {
+        console.error(error);
     };
 };
 
 //---------------------------------------------------------
-//WEBPAGE POPULATOR/GRAPHER FUNCTION FOR ANY GIVEN SUBJECT NUMBER
+// INIT / MAIN FUNCTION FOR WEB
 //---------------------------------------------------------
-function populator(subjectNum) {
-    //build table
-    let metadata = scrapeData(subjectNum, "metadata");
-    buildTable(metadata);
+async function main() {
+    // load the file
+    let rawData = await loadFile(filepath);
+    // console.log(rawData)
+    let initialValue = rawData.names[0];
 
-    // build charts
-    let sample = scrapeData(subjectNum, "sample");
-    let sortedSample = sortTopTen(sample);
-    buildBar(sortedSample);
-    buildBubble(sortedSample);
-    // buildGauge(sortedSample);
-};
-
-//---------------------------------------------------------
-//SORTER FUNCTION TO FIND TOP 10 OTU FROM SAMPLE
-//---------------------------------------------------------
-// // define a helper function called zip to help combine arrays
-// function zip(arr1, arr2) {
-//     return arr1.map((element, i) => [element, arr2[i]]);
-// };
-
-// // function that sorts, using the helper function
-// function sortTopTen(sample) {
-//     let zippedSample = zip(Object.values(sample.sample_values), zip(Object.values(sample.otu_ids), Object.values(sample.otu_labels)));
-//     let sortedZippedSample = zippedSample.sort((a,b) => b[0] - a[0]);
-//     return sortedZippedSample.slice(0, 10);
-// };
-
-// sample is already sorted, just return the slice
-function sortTopTen(sample) {
-    sample.otu_ids = sample.otu_ids.slice(0, 10)
-    sample.otu_labels = sample.otu_labels.slice(0, 10)
-    sample.sample_values = sample.sample_values.slice(0, 10)
-};
-
-//---------------------------------------------------------
-//WEBPAGE CONSTRUCTOR FUNCTION FOR CREATING GRAPH ELEMENTS
-//---------------------------------------------------------
-function constructor() {
-    // initialize default graphs
-    populator('940')
-    // add functionality to each item in dropdown menu
-    document.querySelector("#selDataset").addEventListener("change", event => {
-        populator(event.target.value);
-    });
-
-    // populate dropdown menu
-    bigData.names.forEach(item => {
+    //populates dropdown and set initial value
+    rawData.names.forEach(sample => {
         let option = document.createElement("option");
-        option.textContent = item;
+        option.textContent = sample;
         document.querySelector("#selDataset").append(option);
     });
-    // initialize default menu option
-    document.querySelector("#selDataset").value = '940';
+    document.querySelector("#selDataset").value = initialValue;
+
+    //loads initial graphs and table
+    graphAll(initialValue);
+
+    //adds event listener to dropdown
+    document.querySelector("#selDataset").addEventListener("change", event => {
+        graphAll(event.target.value);
+    })
 };
 
 //---------------------------------------------------------
-//AND FINALLY, RUNNING ALL THE FUNCTIONS
+//INIT WEBPAGE
 //---------------------------------------------------------
-constructor();
+main();
